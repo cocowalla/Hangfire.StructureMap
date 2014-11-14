@@ -1,0 +1,79 @@
+<Project DefaultTargets="build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke" AssemblyName="Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"/>
+	
+	<ItemGroup>
+		<HangfireStructureMapProjects Include="..\src\Hangfire.StructureMap\Hangfire.StructureMap.csproj" />
+		
+		<Docs Include="..\src\Hangfire.StructureMap\bin\Release\Hangfire.StructureMap.xml" />
+    
+		<NuSpecFiles Include="$(ScriptsFolder)\*.nuspec" />
+		<DependantNuSpecFiles Include="$(ScriptsFolder)\*.nuspec" Exclude="$(ScriptsFolder)\Hangfire.StructureMap.nuspec" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<!-- Should be provided from command line -->
+		<Version></Version>
+    
+    <!-- Default value we expect to find in the nuspec file, to be replaced with version from command line -->
+    <DefaultNuSpecVersion>0.0.1</DefaultNuSpecVersion>
+    
+		<ToolsFolder>..\tools</ToolsFolder>
+		<ScriptsFolder>..\build</ScriptsFolder>
+		<BuildOutputFolder>..\deploy\net45</BuildOutputFolder>
+		<NuGetOutputFolder>..\deploy</NuGetOutputFolder>
+		
+		<NuGet>$(ToolsFolder)\NuGet\NuGet.exe</NuGet>
+	</PropertyGroup>
+
+	<Target Name="build" DependsOnTargets="clean;compile;copy;nugetPackage;publish" />
+
+	<Target Name="clean">
+		<Message Importance="High" Text="Cleaning output folder"/>
+		
+		<RemoveDir Directories="$(BuildOutputFolder)" ContinueOnError="true" />
+	</Target>
+
+	<Target Name="compile">
+		<Message Importance="High" Text="Compiling"/>
+
+		<MSBuild Projects="@(HangfireStructureMapProjects)" Targets="build" StopOnFirstFailure="true" Properties="Configuration=Release">
+			<Output TaskParameter="TargetOutputs" ItemName="AssembliesBuilt" />
+		</MSBuild>
+	</Target>
+
+	<Target Name="copy">
+		<Message Importance="High" Text="Copying build output to deploy folder"/>
+
+		<Copy SourceFiles="@(AssembliesBuilt)" DestinationFolder="$(BuildOutputFolder)" />
+		<Copy SourceFiles="@(Docs)" DestinationFolder="$(BuildOutputFolder)" />
+	</Target>
+
+	<Target Name="nugetPackage" DependsOnTargets="nugetUpdateVersion" Condition="'$(Version)' != ''">
+		<Message Importance="High" Text="NuGet packing..."/>
+
+		<Exec Command="$(NuGet) pack %(NuSpecFiles.FullPath) -OutputDirectory $(NuGetOutputFolder)"/>
+		
+		<!-- Revert NuSpec versions; version doesn't need to be committed to source control -->
+		<XmlPoke XmlInputPath="%(NuSpecFiles.FullPath)" Query="//version" Value="$(DefaultNuSpecVersion)" />
+		<XmlPoke XmlInputPath="%(DependantNuSpecFiles.FullPath)" Query="//dependency[@id='Hangfire.StructureMap']/@version" Value="$(DefaultNuSpecVersion)" />
+	</Target>
+
+	<Target Name="nugetUpdateVersion" Condition="'$(Version)' != ''">
+		<Message Importance="High" Text="Updating NuSpec version..."/>
+		
+		<XmlPoke XmlInputPath="%(NuSpecFiles.FullPath)" Query="//version" Value="$(Version)" />
+		<XmlPoke XmlInputPath="%(DependantNuSpecFiles.FullPath)" Query="//dependency[@id='Hangfire.StructureMap']/@version" Value="$(Version)" />
+	</Target>
+
+  <Target Name="publish" DependsOnTargets="nugetPackage" Condition="'$(Version)' != ''">
+		<Message Importance="High" Text="Publishing NuGet packages..." />
+
+    <ItemGroup>
+      <NuGetPackages Include="$(NuGetOutputFolder)\*.nupkg" />
+    </ItemGroup>
+
+    <Exec Command="$(NuGet) push %(NuGetPackages.FullPath)" />
+  </Target>
+  
+</Project>
