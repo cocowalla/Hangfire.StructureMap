@@ -12,13 +12,13 @@
     <description>StructureMap IoC container support for Hangfire</description>
     <copyright>Copyright © 2014</copyright>
     <tags>Hangfire StructureMap IoC</tags>
+    <dependencies>
+      <dependency id="StructureMap" version="3.1.4.143" />
+      <dependency id="Hangfire.Core" version="1.1.1" />
+    </dependencies>
   </metadata>
   <files>
     <file src="..\deploy\**\Hangfire.StructureMap.dll" target="lib\net45" />
     <file src="..\deploy\**\Hangfire.StructureMap.xml" target="lib\net45" />
   </files>
-	<dependencies>
-		<dependency id="StructureMap" version="3.1.4.143" />
-		<dependency id="Hangfire.Core" version="1.1.1" />
-	</dependencies>
 </package>

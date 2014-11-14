@@ -56,14 +56,12 @@
 		
 		<!-- Revert NuSpec versions; version doesn't need to be committed to source control -->
 		<XmlPoke XmlInputPath="%(NuSpecFiles.FullPath)" Query="//version" Value="$(DefaultNuSpecVersion)" />
-		<XmlPoke XmlInputPath="%(DependantNuSpecFiles.FullPath)" Query="//dependency[@id='Hangfire.StructureMap']/@version" Value="$(DefaultNuSpecVersion)" />
 	</Target>
 
 	<Target Name="nugetUpdateVersion" Condition="'$(Version)' != ''">
 		<Message Importance="High" Text="Updating NuSpec version..."/>
 		
 		<XmlPoke XmlInputPath="%(NuSpecFiles.FullPath)" Query="//version" Value="$(Version)" />
-		<XmlPoke XmlInputPath="%(DependantNuSpecFiles.FullPath)" Query="//dependency[@id='Hangfire.StructureMap']/@version" Value="$(Version)" />
 	</Target>
 
   <Target Name="publish" DependsOnTargets="nugetPackage" Condition="'$(Version)' != ''">
