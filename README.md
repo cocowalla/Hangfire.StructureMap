@@ -1,37 +1,12 @@
 Hangfire.StructureMap
-======
+=====================
 
-[Hangfire](http://hangfire.io) background job activator based on the [StructureMap](http://structuremap.net) IoC container. 
-It allows you to use instance methods of classes that define parametrized constructors:
-
-```csharp
-public class EmailService
-{
-	private DbContext context;
-	private IEmailSender sender;
-	
-	public EmailService(DbContext context, IEmailSender sender)
-	{
-		this.context = context;
-		this.sender = sender;
-	}
-	
-	public void Send(int userId, string message)
-	{
-		var user = this.context.Users.Get(userId);
-		this.sender.Send(user.Email, message);
-	}
-}	
-
-// Somewhere in the code
-BackgroundJob.Enqueue<EmailService>(x => x.Send(1, "Hello, world!"));
-```
+[StructureMap](http://structuremap.github.io/) support for [Hangfire](http://hangfire.io). Provides an implementation of the `JobActivator` class and plugin family expression extensions, allowing you to use StructureMap IoC container to **resolve job type instances** as well as **control the lifetime** of the related dependencies.
 
 Installation
 --------------
 
-Hangfire.StructureMap is available as a NuGet Package. Type the following
-command into NuGet Package Manager Console window to install it:
+*Hangfire.StructureMap* is available as a NuGet Package. Type the following command into NuGet Package Manager Console window to install it:
 
 ```
 Install-Package Hangfire.StructureMap
@@ -40,39 +15,64 @@ Install-Package Hangfire.StructureMap
 Usage
 ------
 
-The package provides an extension method for [OWIN bootstrapper](http://docs.hangfire.io/en/latest/users-guide/getting-started/owin-bootstrapper.html):
+The package provides an extension method for the `IGlobalConfiguration` interface, so you can enable StructureMap integration using the `GlobalConfiguration` class.
 
 ```csharp
-app.UseHangfire(config =>
-{
-	var container = new Container(x =>
-		// Configure your container here
-	);
-	
-	config.UseStructureMapActivator(container);
-});
+var container = new Container();
+// container.Configure...
+
+GlobalConfiguration.Configuration.UseStructureMapActivator(container);
 ```
 
-In order to use the library outside of web application, set the static `JobActivator.Current` property:
+After invoking the methods above, StructureMap-based implementation of the `JobActivator` class will be used to resolve job type instances and all their dependencies during the background processing.
+
+### Re-using Dependencies
+
+Sometimes it is necessary to re-use instances that are already created, such as database connection, unit of work, etc. Thanks to the [custom lifecycles based on ILifecycle](http://structuremap.github.io/object-lifecycle/custom-lifecycles/) feature of StructureMap, you are able to do this by implementing a custom lifecycle.
+
+*Hangfire.StructureMap* provides a `BackgroundJobLifecycle` as a [custom implmentation of ILifecycle](http://structuremap.github.io/object-lifecycle/custom-lifecycles/) to allow you to limit the object scope to the **current background job processing**, just call the `BackgroundJobScoped` extension method in your create plugin family expression logic:
 
 ```csharp
-var container = new Container(x =>
-	// Configure your container here
-);
+container.For<IDatabase>().BackgroundJobScoped().Use<Database>();
+```
 
-JobActivator.Current = new StructureMapActivator(container);
+*OR*
+
+```csharp
+container.For<IDatabase>().LifecycleIs<BackgroundJobLifecycle>().Use<Database>();
+```
+
+
+### Deterministic Disposal
+
+All the dependencies that implement the `IDisposable` interface are disposed as soon as current background job is performed, but **only when they were registered using the `BackgroundJobScoped` method**. For other cases, StructureMap itself is responsible for disposing instances, so please read about the [object lifecycles](http://structuremap.github.io/object-lifecycle/).
+
+For most typical cases, you can call the `BackgroundJobScoped` method on a job plugin family expression and implement the `Dispose` method that will dispose all the dependencies manually:
+
+```csharp
+public class JobClass : IDisposable
+{
+    public JobClass(Dependency dependency) { /* ... */ }
+
+    public Dispose()
+    {
+        _dependency.Dispose();
+    }
+}
+```
+
+```csharp
+container.For<JobClass>().BackgroundJobScoped();
 ```
 
 HTTP Request warnings
 -----------------------
 
-Services registered with `HttpContextScoped()` directive **will be unavailable** during job activation, you should re-register 
-these services without this hint.
+Services registered with `HttpContextScoped()` directive or the `HttpContextLifecycle` lifecycle **will be unavailable** during job activation, you should re-register these services without this hint.
 
-`HttpContext.Current` is also **not available** during the job performance. 
-Don't use it!
+**`HttpContext.Current` is also not available during the job performance. Don't use it!**
 
 Notes
 ------
 
-This is pretty much a conversion of [HangFire.Ninject](https://github.com/HangfireIO/Hangfire.Ninject) for [StructureMap](http://structuremap.net).
+This package takes advantage of [nested containers](http://structuremap.github.io/the-container/nested-containers/).  The `StructureMapJobActivator` creates a nested container for the `StructureMapDependencyScope` which is based on Hangfire's `JobActivatorScope`

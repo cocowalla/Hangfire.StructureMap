@@ -107,7 +107,7 @@
         public void Instance_Registered_With_BackgroundJobScope_Is_Disposed_On_Scope_Disposal()
         {
             BackgroundJobDependency disposable;
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().BackgroundJobScoped().Use<BackgroundJobDependency>());
+            _container.Configure(expression => expression.For<BackgroundJobDependency>().BackgroundJobScoped());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
@@ -122,7 +122,7 @@
         [Fact]
         public void Instance_Registered_With_BackgroundJobScope_Is_Reused_For_Other_Objects()
         {
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().BackgroundJobScoped().Use<BackgroundJobDependency>());
+            _container.Configure(expression => expression.For<BackgroundJobDependency>().BackgroundJobScoped());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
@@ -135,7 +135,7 @@
         [Fact]
         public void Instance_Registered_With_TransientScope_Is_Not_Reused_For_Other_Objects()
         {
-            _container.Configure(expression => expression.For<UniqueDependency>().AlwaysUnique().Use<UniqueDependency>());
+            _container.Configure(expression => expression.For<UniqueDependency>().AlwaysUnique());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
