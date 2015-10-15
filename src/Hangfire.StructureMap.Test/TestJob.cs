@@ -1,13 +1,53 @@
-﻿
-namespace Hangfire.StructureMap.Test
+﻿namespace Hangfire.StructureMap.Test
 {
+    using System;
+
     public class TestJob
     {
-        public TestJob(int dependency)
+        public TestJob(BackgroundJobDependency backgroundJobDependency, UniqueDependency uniqueDependency, ObjectDependsOnSameDependency sameDependencyObject)
         {
-            this.Dependency = dependency;
+            BackgroundJobDependency = backgroundJobDependency;
+            UniqueDependency = uniqueDependency;
+            SameDependencyObject = sameDependencyObject;
         }
 
-        public int Dependency { get; private set; }
+        public BackgroundJobDependency BackgroundJobDependency { get; private set; }
+
+        public UniqueDependency UniqueDependency { get; private set; }
+
+        public ObjectDependsOnSameDependency SameDependencyObject { get; private set; }
+    }
+
+    public class ObjectDependsOnSameDependency
+    {
+        public ObjectDependsOnSameDependency(BackgroundJobDependency backgroundJobDependency, UniqueDependency uniqueDependency)
+        {
+            BackgroundJobDependency = backgroundJobDependency;
+            UniqueDependency = uniqueDependency;
+        }
+
+        public BackgroundJobDependency BackgroundJobDependency { get; private set; }
+
+        public UniqueDependency UniqueDependency { get; private set; }
+    }
+
+    public class BackgroundJobDependency : IDisposable
+    {
+        public bool Disposed { get; private set; }
+
+        public void Dispose()
+        {
+            Disposed = true;
+        }
+    }
+
+    public class UniqueDependency : IDisposable
+    {
+        public bool Disposed { get; private set; }
+
+        public void Dispose()
+        {
+            Disposed = true;
+        }
     }
 }
