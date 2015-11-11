@@ -63,9 +63,6 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackgroundJobLifecycle.cs" />
-    <Compile Include="CreatePluginFamilyExpressionExtensions.cs" />
-    <Compile Include="GenericFamilyExpressionExtensions.cs" />
     <Compile Include="GlobalConfigurationExtensions.cs" />
     <Compile Include="StructureMapBootstrapperConfigurationExtensions.cs" />
     <Compile Include="StructureMapJobActivator.cs" />

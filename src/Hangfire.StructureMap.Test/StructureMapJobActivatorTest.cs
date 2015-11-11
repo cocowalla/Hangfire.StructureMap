@@ -5,6 +5,7 @@
     using Moq;
 
     using global::StructureMap;
+    using global::StructureMap.Pipeline;
 
     using Xunit;
 
@@ -77,7 +78,7 @@
         [Fact]
         public void In_BackgroundJobScope_Registers_Same_Service_Instance_For_The_Same_Scope_Instance()
         {
-            _container.Configure(expression => expression.For<object>().BackgroundJobScoped().Use(() => new object()));
+            _container.Configure(expression => expression.For<object>().LifecycleIs<ContainerLifecycle>().Use(() => new object()));
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
@@ -107,7 +108,7 @@
         public void Instance_Registered_With_BackgroundJobScope_Is_Disposed_On_Scope_Disposal()
         {
             BackgroundJobDependency disposable;
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().BackgroundJobScoped());
+            _container.Configure(expression => expression.For<BackgroundJobDependency>().LifecycleIs<ContainerLifecycle>());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
@@ -122,7 +123,7 @@
         [Fact]
         public void Instance_Registered_With_BackgroundJobScope_Is_Reused_For_Other_Objects()
         {
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().BackgroundJobScoped());
+            _container.Configure(expression => expression.For<BackgroundJobDependency>().LifecycleIs<ContainerLifecycle>());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
