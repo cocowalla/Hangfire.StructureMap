@@ -9,7 +9,7 @@ Installation
 *Hangfire.StructureMap* is available as a NuGet Package. Type the following command into NuGet Package Manager Console window to install it:
 
 ```
-Install-Package Hangfire.StructureMap
+Install-Package Hangfire.StructureMap3
 ```
 
 Usage
