@@ -1,8 +1,10 @@
 ﻿namespace Hangfire.StructureMap
 {
     using System;
+    using System.Linq;
 
     using global::StructureMap;
+    using global::StructureMap.Pipeline;
 
     /// <summary>
     /// StructureMap Job Activator.
@@ -52,7 +54,10 @@
 
             public override void DisposeScope()
             {
-                BackgroundJobLifecycle.DisposeAndClearAll();
+                var containerLifecycleInstanceRef = _container.Model.AllInstances.FirstOrDefault(@ref => @ref.Lifecycle is ContainerLifecycle);
+
+                if (containerLifecycleInstanceRef != null) containerLifecycleInstanceRef.Lifecycle.EjectAll(_container.Model.Pipeline);
+
                 _container.Dispose();
             }
         }
