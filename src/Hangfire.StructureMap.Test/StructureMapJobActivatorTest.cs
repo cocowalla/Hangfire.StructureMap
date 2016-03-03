@@ -1,12 +1,8 @@
 ﻿namespace Hangfire.StructureMap.Test
 {
     using System;
-
     using Moq;
-
     using global::StructureMap;
-    using global::StructureMap.Pipeline;
-
     using Xunit;
 
     public class StructureMapJobActivatorTest
@@ -21,8 +17,9 @@
         [Fact]
         public void Ctor_Should_Throw_When_Container_Is_Null()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new StructureMapJobActivator(null));
-            Assert.Equal("Value cannot be null.\r\nParameter name: container", exception.Message);
+            var exception = Record.Exception(() => new StructureMapJobActivator(null));
+            Assert.NotNull(exception);
+            Assert.IsType<ArgumentNullException>(exception);
         }
 
         [Fact]
@@ -78,7 +75,7 @@
         [Fact]
         public void In_BackgroundJobScope_Registers_Same_Service_Instance_For_The_Same_Scope_Instance()
         {
-            _container.Configure(expression => expression.For<object>().LifecycleIs<ContainerLifecycle>().Use(() => new object()));
+            _container.Configure(expression => expression.For<object>().Use(() => new object()).ContainerScoped());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
@@ -108,7 +105,7 @@
         public void Instance_Registered_With_BackgroundJobScope_Is_Disposed_On_Scope_Disposal()
         {
             BackgroundJobDependency disposable;
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().LifecycleIs<ContainerLifecycle>());
+            _container.Configure(expression => expression.For<BackgroundJobDependency>().ContainerScoped());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())
@@ -123,7 +120,7 @@
         [Fact]
         public void Instance_Registered_With_BackgroundJobScope_Is_Reused_For_Other_Objects()
         {
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().LifecycleIs<ContainerLifecycle>());
+            _container.Configure(expression => expression.For<BackgroundJobDependency>().ContainerScoped());
             var activator = CreateActivator();
 
             using (var scope = activator.BeginScope())

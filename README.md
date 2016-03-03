@@ -28,19 +28,19 @@ After invoking the methods above, StructureMap-based implementation of the `JobA
 
 ### Re-using Dependencies
 
-Sometimes it is necessary to re-use instances that are already created, such as database connection, unit of work, etc. Thanks to the [custom lifecycles based on ILifecycle](http://structuremap.github.io/object-lifecycle/custom-lifecycles/) feature of StructureMap, you are able to do this by implementing a custom lifecycle.
+Sometimes it is necessary to re-use instances that are already created, such as database connection, unit of work, etc. Thanks to the [ContainerLifecycle](http://structuremap.github.io/object-lifecycle/supported-lifecycles/#sec3) feature of StructureMap, you are able to do this by resolving objects from the [nested container](http://structuremap.github.io/the-container/nested-containers/).
 
-*Hangfire.StructureMap* relies on the built-in StructureMap lifecycle, `ContainerLifecycle`, to allow you to limit the object scope to the **current background job processing**, just call the `LifecycleIs` extension method in your create plugin family expression logic:
+*Hangfire.StructureMap* doesn't rely on a specific lifecycle. To allow you to limit the object scope to the **current background job processing**, use the `ContainerScoped` extension method when configuring your dependencies.
 
 ```csharp
-container.For<IDatabase>().LifecycleIs<ContainerLifecycle>().Use<Database>();
+container.For<IDatabase>().ContainerScoped().Use<Database>();
 ```
 
 ### Deterministic Disposal
 
-All the dependencies that implement the `IDisposable` interface are disposed as soon as current background job is performed, but **only when they were registered with the `ContainerLifecycle` lifecycle**. For other cases, StructureMap itself is responsible for disposing instances, so please read about the [object lifecycles](http://structuremap.github.io/object-lifecycle/).
+All the dependencies that implement the `IDisposable` interface are disposed as soon as current background job is performed, but **only when they were registered with the `ContainerLifecycle` lifecycle**. For other cases, please read about [object lifecycles](http://structuremap.github.io/object-lifecycle/).
 
-For most typical cases, you can call the `LifecycleIs<>` method on a job plugin family expression and implement the `Dispose` method that will dispose all the dependencies manually:
+For most typical cases, you can call the `ContainerScoped` extension method on a job plugin family expression and implement the `Dispose` method that will dispose all the dependencies manually:
 
 ```csharp
 public class JobClass : IDisposable
@@ -57,7 +57,7 @@ public class JobClass : IDisposable
 ```
 
 ```csharp
-container.For<JobClass>().LifecycleIs<ContainerLifecycle>();
+container.For<JobClass>().ContainerScoped();
 ```
 
 HTTP Request warnings

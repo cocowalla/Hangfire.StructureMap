@@ -13,8 +13,8 @@
     <copyright>Copyright © 2014</copyright>
     <tags>Hangfire StructureMap IoC</tags>
     <dependencies>
-      <dependency id="StructureMap" version="3.1.4.143" />
-      <dependency id="Hangfire.Core" version="1.1.1" />
+      <dependency id="StructureMap" version="4.1.0.361" />
+      <dependency id="Hangfire.Core" version="1.5.3" />
     </dependencies>
   </metadata>
   <files>

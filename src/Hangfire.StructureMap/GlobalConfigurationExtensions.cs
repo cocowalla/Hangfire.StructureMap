@@ -24,8 +24,8 @@
         /// </exception>
         public static IGlobalConfiguration<StructureMapJobActivator> UseStructureMapActivator([NotNull] this IGlobalConfiguration configuration, [NotNull] IContainer container)
         {
-            if (configuration == null) throw new ArgumentNullException("configuration");
-            if (container == null) throw new ArgumentNullException("container");
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            if (container == null) throw new ArgumentNullException(nameof(container));
 
             return configuration.UseActivator(new StructureMapJobActivator(container));
         }
