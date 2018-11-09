@@ -1,163 +1,196 @@
-﻿namespace Hangfire.StructureMap.Test
+﻿using System;
+using FakeItEasy;
+using Shouldly;
+using StructureMap;
+using Xunit;
+
+namespace Hangfire.StructureMap.Test
 {
-    using System;
-    using Moq;
-    using global::StructureMap;
-    using Xunit;
 
     public class StructureMapJobActivatorTest
     {
-        private readonly IContainer _container;
+        private readonly IContainer container;
 
         public StructureMapJobActivatorTest()
         {
-            _container = new Container();
+            this.container = new Container();
         }
 
         [Fact]
         public void Ctor_Should_Throw_When_Container_Is_Null()
         {
-            var exception = Record.Exception(() => new StructureMapJobActivator(null));
-            Assert.NotNull(exception);
-            Assert.IsType<ArgumentNullException>(exception);
+            // ReSharper disable once ObjectCreationAsStatement
+            Should.Throw<ArgumentNullException>(() => new StructureMapJobActivator(null));
         }
 
         [Fact]
         public void Class_Is_Based_On_JobActivator()
         {
             var activator = CreateActivator();
-            Assert.IsAssignableFrom<JobActivator>(activator);
+
+            // ReSharper disable once IsExpressionAlwaysTrue
+            var isJobActivator = activator is JobActivator;
+            isJobActivator.ShouldBeTrue();
         }
 
         [Fact]
-        public void ActivateJob_Calls_StructureMap()
+        public void ActivateJob_Resolves_Instance_Using_StructureMap()
         {
-            _container.Inject("called");
-            var activator = CreateActivator();
-            var result = activator.ActivateJob(typeof(string));
-            Assert.Equal("called", result);
-        }
-
-        [Fact]
-        public void Instance_Registered_With_Transient_Scope_Is_Not_Disposed_On_Scope_Disposal()
-        {
-            var disposable = new BackgroundJobDependency();
-            _container.Inject(disposable);
+            var dependency = new BackgroundJobDependency();
+            this.container.Inject(dependency);
             var activator = CreateActivator();
 
-            using (var scope = activator.BeginScope())
-            {
-                var instance = scope.Resolve(typeof(BackgroundJobDependency));
-                Assert.Same(instance, disposable);
-                Assert.False(((BackgroundJobDependency)instance).Disposed);
-            }
-
-            Assert.False(disposable.Disposed);
+            var result = activator.ActivateJob(typeof(BackgroundJobDependency));
+            result.ShouldBe(dependency);
         }
 
         [Fact]
-        public void Instance_Registered_With_Singleton_Scope_Is_Not_Disposed_On_Scope_Disposal()
+        public void Container_Scoped_Instance_Is_Disposed_When_Job_Scope_Is_Disposed()
         {
-            var disposable = new BackgroundJobDependency();
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().Singleton().Use(disposable));
-            var activator = CreateActivator();
+            this.container.Configure(c => c.For<BackgroundJobDependency>().ContainerScoped());
 
-            using (var scope = activator.BeginScope())
-            {
-                var instance = scope.Resolve(typeof(BackgroundJobDependency));
-                Assert.Same(instance, disposable);
-                Assert.False(((BackgroundJobDependency)instance).Disposed);
-            }
-
-            Assert.False(disposable.Disposed);
-        }
-
-        [Fact]
-        public void In_BackgroundJobScope_Registers_Same_Service_Instance_For_The_Same_Scope_Instance()
-        {
-            _container.Configure(expression => expression.For<object>().Use(() => new object()).ContainerScoped());
-            var activator = CreateActivator();
-
-            using (var scope = activator.BeginScope())
-            {
-                var instance1 = scope.Resolve(typeof(object));
-                var instance2 = scope.Resolve(typeof(object));
-
-                Assert.Same(instance1, instance2);
-            }
-        }
-
-        [Fact]
-        public void In_BackgroundJobScope_Registers_Different_Service_Instances_For_Different_Scope_Instances()
-        {
-            _container.Configure(expression => expression.For<object>().Use(() => new object()));
-            var activator = CreateActivator();
-
-            object instance1;
-            using (var scope1 = activator.BeginScope()) instance1 = scope1.Resolve(typeof(object));
-            object instance2;
-            using (var scope2 = activator.BeginScope()) instance2 = scope2.Resolve(typeof(object));
-
-            Assert.NotSame(instance1, instance2);
-        }
-
-        [Fact]
-        public void Instance_Registered_With_BackgroundJobScope_Is_Disposed_On_Scope_Disposal()
-        {
             BackgroundJobDependency disposable;
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().ContainerScoped());
-            var activator = CreateActivator();
-
-            using (var scope = activator.BeginScope())
+            using (var scope = BeginJobScope())
             {
                 disposable = (BackgroundJobDependency)scope.Resolve(typeof(BackgroundJobDependency));
-                Assert.False(disposable.Disposed);
+
+                disposable.Disposed.ShouldBeFalse();
             }
 
-            Assert.True(disposable.Disposed);
+            // Now the scope is disposed, dependencies should be too
+            disposable.Disposed.ShouldBeTrue();
         }
 
         [Fact]
-        public void Instance_Registered_With_BackgroundJobScope_Is_Reused_For_Other_Objects()
+        public void Singleton_Scoped_Instance_Is_Not_Disposed_When_Job_Scope_Is_Disposed()
         {
-            _container.Configure(expression => expression.For<BackgroundJobDependency>().ContainerScoped());
-            var activator = CreateActivator();
+            var disposable = new BackgroundJobDependency();
+            this.container.Configure(c => c.For<BackgroundJobDependency>().Singleton().Use(disposable));
 
-            using (var scope = activator.BeginScope())
+            using (var scope = BeginJobScope())
+            {
+                var instance = scope.Resolve(typeof(BackgroundJobDependency)) as BackgroundJobDependency;
+
+                instance.ShouldBe(disposable);
+                instance.Disposed.ShouldBeFalse();
+            }
+
+            // Singletons should live on after the scope is disposed
+            disposable.Disposed.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Transient_Scoped_Instance_Is_Disposed_When_Job_Scope_Is_Disposed()
+        {
+            this.container.Configure(c => c.For<BackgroundJobDependency>().Use(() => new BackgroundJobDependency()));
+
+            BackgroundJobDependency disposable;
+            using (var scope = BeginJobScope())
+            {
+                disposable = scope.Resolve(typeof(BackgroundJobDependency)) as BackgroundJobDependency;
+
+                disposable.ShouldNotBeNull();
+                disposable.Disposed.ShouldBeFalse();
+            }
+
+            // Now the scope is disposed, dependencies should be too
+            disposable.Disposed.ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// Injecting an existing object into the Container makes it a de facto singleton (or at least, it's up to
+        /// the injector to manage its lifecycle)
+        /// <seealso cref="http://structuremap.github.io/registration/existing-objects/"/>
+        /// </summary>
+        [Fact]
+        public void Implicitly_Singleton_Scoped_Instance_Is_Not_Disposed_When_Job_Scope_Is_Disposed()
+        {
+            var existingInstance = new BackgroundJobDependency();
+            this.container.Configure(c => c.For<BackgroundJobDependency>().Use(existingInstance));
+
+            using (var scope = BeginJobScope())
+            {
+                var disposable = scope.Resolve(typeof(BackgroundJobDependency)) as BackgroundJobDependency;
+
+                disposable.ShouldBe(existingInstance);
+                disposable.Disposed.ShouldBeFalse();
+            }
+            
+            existingInstance.Disposed.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Container_Scoped_Instances_Are_Not_Reused_Between_Different_Job_Scopes()
+        {
+            this.container.Configure(c => c.For<object>().Use(() => new object()).ContainerScoped());
+
+            object instance1;
+            using (var scope1 = BeginJobScope())
+            {
+                instance1 = scope1.Resolve(typeof(object));
+            }
+
+            object instance2;
+            using (var scope2 = BeginJobScope())
+            {
+                instance2 = scope2.Resolve(typeof(object));
+            }
+
+            instance1.ShouldNotBe(instance2);
+        }
+
+        [Fact]
+        public void Container_Scoped_Instance_Is_Reused_Within_Same_Job_Scope()
+        {
+            this.container.Configure(c => c.For<BackgroundJobDependency>().ContainerScoped());
+
+            using (var scope = BeginJobScope())
             {
                 var instance = (TestJob)scope.Resolve(typeof(TestJob));
-                Assert.Same(instance.BackgroundJobDependency, instance.SameDependencyObject.BackgroundJobDependency);
+
+                instance.BackgroundJobDependency.ShouldBe(instance.SameDependencyObject.BackgroundJobDependency);
             }
         }
 
         [Fact]
-        public void Instance_Registered_With_TransientScope_Is_Not_Reused_For_Other_Objects()
+        public void AlwaysUnique_Scoped_Instance_Is_Not_Reused_Within_Same_Job_Scope()
         {
-            _container.Configure(expression => expression.For<UniqueDependency>().AlwaysUnique());
-            var activator = CreateActivator();
+            this.container.Configure(c => c.For<UniqueDependency>().AlwaysUnique());
 
-            using (var scope = activator.BeginScope())
+            using (var scope = BeginJobScope())
             {
                 var instance = (TestJob)scope.Resolve(typeof(TestJob));
-                Assert.NotSame(instance.UniqueDependency, instance.SameDependencyObject.UniqueDependency);
+
+                instance.UniqueDependency.ShouldNotBe(instance.SameDependencyObject.UniqueDependency);
             }
         }
 
+        private JobActivatorScope BeginJobScope()
+        {
+            var activator = CreateActivator();
+#if NET45
+#pragma warning disable CS0618 // Type or member is obsolete
+            return activator.BeginScope();
+#pragma warning restore CS0618 // Type or member is obsolete
+#else
+            return activator.BeginScope(null);
+#endif
+        }
+
+#if NET45
         [Fact]
-        public void Use_StructureMapActivator_Passes_Correct_Activator()
+        public void Bootstrapper_Use_StructureMapActivator_Passes_Correct_Activator()
         {
 #pragma warning disable 618
-            var configuration = new Mock<IBootstrapperConfiguration>();
-            var container = new Mock<IContainer>();
+            var configuration = A.Fake<IBootstrapperConfiguration>();
 
-            configuration.Object.UseStructureMapActivator(container.Object);
-            configuration.Verify(bootstrapperConfiguration => bootstrapperConfiguration.UseActivator(It.IsAny<StructureMapJobActivator>()));
+            configuration.UseStructureMapActivator(this.container);
+
+            A.CallTo(() => configuration.UseActivator(A<StructureMapJobActivator>.That.IsNotNull())).MustHaveHappened();
 #pragma warning restore 618
         }
+#endif
 
-        private StructureMapJobActivator CreateActivator()
-        {
-            return new StructureMapJobActivator(_container);
-        }
+        private StructureMapJobActivator CreateActivator() => new StructureMapJobActivator(this.container);
     }
 }
