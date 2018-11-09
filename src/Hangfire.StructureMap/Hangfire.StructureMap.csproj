@@ -17,7 +17,6 @@
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/cocowalla/Hangfire.StructureMap</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <DocumentationFile>bin\$(Configuration)\Hangfire.StructureMap.xml</DocumentationFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
