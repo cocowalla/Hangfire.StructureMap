@@ -12,7 +12,6 @@ addons:
     packages:
     - dotnet-hostfxr-1.1.0
     - dotnet-sharedframework-microsoft.netcore.app-1.1.7
-    - dotnet-sdk-2.1
 
 install:
   - export DOTNET_CLI_TELEMETRY_OPTOUT=1
