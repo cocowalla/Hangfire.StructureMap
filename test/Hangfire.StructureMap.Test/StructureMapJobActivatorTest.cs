@@ -6,7 +6,6 @@ using Xunit;
 
 namespace Hangfire.StructureMap.Test
 {
-
     public class StructureMapJobActivatorTest
     {
         private readonly IContainer container;
@@ -83,6 +82,24 @@ namespace Hangfire.StructureMap.Test
         public void Transient_Scoped_Instance_Is_Disposed_When_Job_Scope_Is_Disposed()
         {
             this.container.Configure(c => c.For<BackgroundJobDependency>().Use(() => new BackgroundJobDependency()));
+
+            BackgroundJobDependency disposable;
+            using (var scope = BeginJobScope())
+            {
+                disposable = scope.Resolve(typeof(BackgroundJobDependency)) as BackgroundJobDependency;
+
+                disposable.ShouldNotBeNull();
+                disposable.Disposed.ShouldBeFalse();
+            }
+
+            // Now the scope is disposed, dependencies should be too
+            disposable.Disposed.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void AlwaysUnique_Scoped_Instance_Is_Disposed_When_Job_Scope_Is_Disposed()
+        {
+            this.container.Configure(c => c.For<BackgroundJobDependency>().Use(() => new BackgroundJobDependency()).AlwaysUnique());
 
             BackgroundJobDependency disposable;
             using (var scope = BeginJobScope())
