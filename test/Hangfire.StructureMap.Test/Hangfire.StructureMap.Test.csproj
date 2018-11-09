@@ -6,8 +6,6 @@
     <Copyright>Copyright © Colin Anderson 2018</Copyright>
     <TargetFrameworks>net452;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">1.1.7</RuntimeFrameworkVersion>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">2.1.5</RuntimeFrameworkVersion>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <AssemblyName>Hangfire.StructureMap.Test</AssemblyName>
