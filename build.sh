@@ -8,6 +8,6 @@ dotnet build ./src/Hangfire.StructureMap/Hangfire.StructureMap.csproj --configur
 cd ./test/Hangfire.StructureMap.Test
 
 dotnet xunit -framework netcoreapp1.1 -fxversion 1.1.7
-dotnet xunit -framework netcoreapp2.0 -fxversion 2.0.9
+dotnet xunit -framework netcoreapp2.0 -fxversion 2.1.5
 
 cd ${TRAVIS_BUILD_DIR}
