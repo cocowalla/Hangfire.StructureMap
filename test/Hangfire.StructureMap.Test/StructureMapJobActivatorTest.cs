@@ -168,7 +168,7 @@ namespace Hangfire.StructureMap.Test
         private JobActivatorScope BeginJobScope()
         {
             var activator = CreateActivator();
-#if NET45
+#if NET452
 #pragma warning disable CS0618 // Type or member is obsolete
             return activator.BeginScope();
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -177,7 +177,7 @@ namespace Hangfire.StructureMap.Test
 #endif
         }
 
-#if NET45
+#if NET452
         [Fact]
         public void Bootstrapper_Use_StructureMapActivator_Passes_Correct_Activator()
         {

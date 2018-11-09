@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.StructureMap", "src\Hangfire.StructureMap\Hangfire.StructureMap.csproj", "{8E00108B-C5C7-49DC-8C58-6CB6533AB701}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.StructureMap.Test", "src\Hangfire.StructureMap.Test\Hangfire.StructureMap.Test.csproj", "{A6D48A11-E7CD-44DC-BE39-049DA418B25B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.StructureMap.Test", "test\Hangfire.StructureMap.Test\Hangfire.StructureMap.Test.csproj", "{A6D48A11-E7CD-44DC-BE39-049DA418B25B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

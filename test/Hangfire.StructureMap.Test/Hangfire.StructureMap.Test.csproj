@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hangfire.StructureMap\Hangfire.StructureMap.csproj" />
+    <ProjectReference Include="..\..\src\Hangfire.StructureMap\Hangfire.StructureMap.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using StructureMap;
 
 namespace Hangfire.StructureMap
 {
-#if NET45
+#if NET452
     /// <summary>
     /// Bootstrapper extensions for StructureMap job activation
     /// </summary>
