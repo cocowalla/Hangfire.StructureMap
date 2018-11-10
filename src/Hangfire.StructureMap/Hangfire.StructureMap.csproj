@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>StructureMap IoC container support for Hangfire. Supports both .NET Framework and .NET Standard.</Description>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionPrefix>2.0.1</VersionPrefix>
     <Authors>Colin Anderson</Authors>
     <Copyright>Copyright © Colin Anderson 2018</Copyright>
     <TargetFrameworks>net452;netstandard1.3;netstandard1.6</TargetFrameworks>
