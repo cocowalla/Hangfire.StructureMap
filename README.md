@@ -1,8 +1,8 @@
 Hangfire.StructureMap
 =====================
 
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/cocowalla/Hangfire.StructureMap?svg=true)](https://ci.appveyor.com/project/ionx-solutions/Hangfire.StructureMap)
-[![Linux Build status](https://api.travis-ci.org/cocowalla/Hangfire.StructureMap.svg)](https://travis-ci.org/cocowalla/Hangfire.StructureMap)
+[![Windows Build Status](https://img.shields.io/appveyor/ci/cocowalla/hangfire-structuremap.svg?label=Windows%20Build)](https://ci.appveyor.com/project/cocowalla/hangfire-structuremap)
+[![Linux Build status](https://img.shields.io/travis/cocowalla/Hangfire.StructureMap.svg?label=Linux%20Build)](https://travis-ci.org/cocowalla/Hangfire.StructureMap)
 [![NuGet](https://img.shields.io/nuget/v/Hangfire.StructureMap.svg)](https://www.nuget.org/packages/Hangfire.StructureMap)
 
 This package provides [StructureMap](http://structuremap.github.io/) support for [Hangfire](http://hangfire.io), allowing nested StructureMap containers to resolve job type instances and their dependencies, and to manage the lifetime of resolved instances.
