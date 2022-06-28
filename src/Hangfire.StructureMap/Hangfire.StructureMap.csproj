@@ -14,7 +14,7 @@
     <PackageId>Hangfire.StructureMap</PackageId>
     <PackageTags>hangfire;background;tasks;jobs;scheduler</PackageTags>
     <PackageProjectUrl>https://github.com/cocowalla/Hangfire.StructureMap</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/cocowalla/Hangfire.StructureMap</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
