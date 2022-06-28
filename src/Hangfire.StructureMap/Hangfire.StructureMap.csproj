@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <Description>StructureMap IoC container support for Hangfire. Supports both .NET Framework and .NET Standard.</Description>
-    <VersionPrefix>2.0.1</VersionPrefix>
+    <VersionPrefix>2.0.2</VersionPrefix>
     <Authors>Colin Anderson</Authors>
     <Copyright>Copyright © Colin Anderson 2018</Copyright>
-    <TargetFrameworks>net452;netstandard1.3;netstandard1.6</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net462;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Hangfire.StructureMap</AssemblyName>
@@ -25,13 +25,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 
   <ItemGroup>
     <PackageReference Include="Hangfire.Core" Version="1.6.0" />
-    <PackageReference Include="structuremap" Version="4.7.0" />
+    <PackageReference Include="structuremap" Version="4.7.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

@@ -4,8 +4,8 @@
     <Description>StructureMap IoC container support for Hangfire - Tests</Description>
     <Authors>Colin Anderson</Authors>
     <Copyright>Copyright © Colin Anderson 2018</Copyright>
-    <TargetFrameworks>net452;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net462;netcoreapp2.1;netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp2.1;netcoreapp3.1;net5.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <AssemblyName>Hangfire.StructureMap.Test</AssemblyName>
@@ -21,20 +21,19 @@
 
   <ItemGroup>
     <PackageReference Include="Hangfire.Core" Version="1.6.0" />
-    <PackageReference Include="structuremap" Version="4.7.0" />
+    <PackageReference Include="structuremap" Version="4.7.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="FakeItEasy" Version="7.3.1" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="FakeItEasy" Version="4.9.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
 </Project>
